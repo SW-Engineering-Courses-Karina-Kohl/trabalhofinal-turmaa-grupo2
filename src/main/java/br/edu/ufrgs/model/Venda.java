@@ -3,12 +3,12 @@ package br.edu.ufrgs.model;
 public class Venda {
     private String idVenda;
     private double valor;
-    private String categoria;
+    private CategoriaProduto categoria;
 
     public Venda(String idVenda, double valor, String categoria) {
         this.idVenda = idVenda;
         this.valor = valor;
-        this.categoria = categoria;
+        this.categoria = new CategoriaProduto(categoria);
     }
 
     public String getIdVenda() {
@@ -17,9 +17,5 @@ public class Venda {
 
     public double getValor() {
         return valor;
-    }
-
-    public String getCategoria() {
-        return categoria;
     }
 }
