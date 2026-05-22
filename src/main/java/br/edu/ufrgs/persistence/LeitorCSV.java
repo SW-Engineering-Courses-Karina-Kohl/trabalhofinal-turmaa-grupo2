@@ -2,25 +2,25 @@ package br.edu.ufrgs.persistence;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class LeitorCSV {
 
-    public String lerArquivo(String caminho, String separador){
+    public List<String> lerArquivo(String caminho){
         BufferedReader leitor = null;
-        String resultado = "";
+        List<String> lista = new ArrayList<>(); //cria uma lista de strings
 
         try{
             FileReader leitorarquivo = new FileReader(caminho);
             leitor = new BufferedReader(leitorarquivo);
 
             String linha = leitor.readLine();
+            linha = leitor.readLine();
 
             while(linha != null){
-                System.out.println(linha);
-                resultado = resultado + linha + "\n";
                 linha = leitor.readLine();
-                System.out.println(resultado);
+                lista.add(linha);
             }
             
         }catch(Exception erro) {
@@ -37,10 +37,7 @@ public class LeitorCSV {
             }
 
         }
-        return resultado;
+        return lista;
     }
-
-
-
 
 }
