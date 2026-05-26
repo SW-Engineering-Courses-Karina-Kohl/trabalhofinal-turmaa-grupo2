@@ -14,7 +14,7 @@ public class GerenciadorDeArquivos {
     }
 
     public List<Venda> lerVendas(String caminhoArquivo) {
-        // Lógica para ler o CSV de entrada 
+        // Lógica para ler o CSV de entrada
         return null; 
     }
 
