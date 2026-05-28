@@ -7,7 +7,7 @@ public class CalculadoraCashback {
 
     public double calcularCashbackCategoria(Venda v) {
         double valor = v.getValor();
-        String cat = v.getCategoria().toLowerCase();
+        String cat = v.getCategoria().getCategoria().toLowerCase();  //
 
         if (cat.contains("eletronicos")) {
             return valor * 0.05;
