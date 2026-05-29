@@ -18,4 +18,7 @@ public class Venda {
     public double getValor() {
         return valor;
     }
+    public CategoriaProduto getCategoria() { // Ou String, dependendo de como tipou
+    return this.categoria;
+    }
 }
