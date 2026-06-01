@@ -1,6 +1,6 @@
 package br.edu.ufrgs.controller;
 
-import br.edu.ufrgs.model.Aluno; // Importação do Model
+//import br.edu.ufrgs.model.Aluno; // Importação do Model
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
