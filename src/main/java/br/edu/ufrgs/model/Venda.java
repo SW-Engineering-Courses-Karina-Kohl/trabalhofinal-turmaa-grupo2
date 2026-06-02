@@ -19,7 +19,7 @@ public class Venda {
         return valor;
     }
 
-    public CategoriaProduto getCategoria(){
+    public CategoriaProduto getCategoria() {
         return categoria;
     }
 }
