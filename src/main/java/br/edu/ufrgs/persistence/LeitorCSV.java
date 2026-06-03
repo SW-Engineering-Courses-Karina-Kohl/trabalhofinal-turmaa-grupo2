@@ -5,8 +5,21 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Classe responsável pela leitura de arquivos CSV.
+ *
+ * @author Luis Antonio
+ */
 public class LeitorCSV {
-
+    /**
+     * Método responsável por ler o arquivo CSV
+     *
+     * @param caminho caminho do arquivo CSV a ser lido
+     * @return lista é uma lista com todas as strings sem formatacao do arquivo retorna
+     * null quando o caminho nao foi encontrado
+     *
+     * @author Luis Antonio
+     */
     public List<String> lerArquivo(String caminho){
         BufferedReader leitor = null;
         List<String> lista = new ArrayList<>(); //cria uma lista de strings
@@ -19,8 +32,9 @@ public class LeitorCSV {
             linha = leitor.readLine();
 
             while(linha != null){
-                linha = leitor.readLine();
                 lista.add(linha);
+                linha = leitor.readLine();
+
             }
             
         }catch(Exception erro) {

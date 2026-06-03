@@ -6,6 +6,7 @@ public class Cliente {
     private int idCliente;
     private String nome;
     private List<Venda> vendas = new ArrayList<>();
+    private double cashBackAcumulado;
 
     public Cliente(int idCliente, String nome) {
         this.idCliente = idCliente;
@@ -35,4 +36,5 @@ public class Cliente {
         }
         return total;
     }
+    public double getCashBackAcumulado(){return cashBackAcumulado;}
 }

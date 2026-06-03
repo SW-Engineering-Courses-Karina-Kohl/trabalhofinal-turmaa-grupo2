@@ -8,8 +8,21 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Classe responsavel por exportar os dados para um arquivo CSV.
+ *
+ * @author Luis Antonio
+ */
 public class ExportadorDadosCSV {
 
+    /**
+     * Método responsável por exportar os dados.
+     *
+     * @param clientes uma lista de clientes com a serem exportados
+     * @param caminho caminho para exportar o caminho para a pasta
+     *
+     * @author Luis Antonio
+     */
     public void ExportaListaCliente(List<Cliente> clientes, String caminho){
         String formato;
 
@@ -17,28 +30,8 @@ public class ExportadorDadosCSV {
 
             for (Cliente cliente : clientes) {
                 //lida com o cliente
-                if (cliente instanceof ClienteNormal) {
-                    //faz algo sobre o cliente normal
-                    formato = cliente.getIdCliente() + "," + cliente.getNome() + ","
-                            + cliente.getValorTotalVendas() + ","  + "cashbackAcumulado" + ","  + "NORMAL";
-
-                    writer.write(formato);
-
-                } else if (cliente instanceof ClienteGold) {
-                    //faz algo sobre cliente gold
-                    formato = cliente.getIdCliente() + "," + cliente.getNome() + ","
-                            + cliente.getValorTotalVendas() + ","  + "cashbackAcumulado" + ","  + "GOLD";
-
-                    writer.write(formato);
-
-                } else if (cliente instanceof ClientePlatinum) {
-                    //faz algo sobre cliente platinum
-                    formato = cliente.getIdCliente() + "," + cliente.getNome() + ","
-                            + cliente.getValorTotalVendas() + ","  + "cashbackAcumulado" + ","  + "PLATINUM";
-
-                    writer.write(formato);
-                }
-
+                formato = formatador(cliente);
+                writer.write(formato);
             }
         } catch (IOException e) {
             System.out.println("Erro na exportação do arquivo csv");
@@ -46,6 +39,26 @@ public class ExportadorDadosCSV {
 
     }
 
+    /**
+     * Metodo responsavel por formatar a string a ser exportada.
+     * @param cliente um cliente que sera exportado
+     * @return formato uma string no formato correto para a exportação
+     *
+     * @author Luis Antonio
+     */
+     private String formatador(Cliente cliente){
+        String formato = cliente.getIdCliente() + "," + cliente.getNome() + ","
+                + cliente.getValorTotalVendas() + ","  + cliente.getCashBackAcumulado() + ",";
+
+        if (cliente instanceof ClienteNormal) {
+             formato = formato + "NORMAL";
+        } else if (cliente instanceof ClienteGold) {
+             formato = formato + "GOLD";
+        } else if (cliente instanceof ClientePlatinum) {
+             formato = formato + "PLATINUM";
+        }
+        return formato;
+     }
 
 
 }
