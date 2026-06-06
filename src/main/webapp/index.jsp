@@ -264,7 +264,7 @@
                                 <th class="px-6 py-4 font-label-caps text-label-caps">ID CLIENTE</th>
                                 <th class="px-6 py-4 font-label-caps text-label-caps">NOME</th>
                                 <th class="px-6 py-4 font-label-caps text-label-caps">TOTAL COMPRADO</th>
-                                <th class="px-6 py-4 font-label-caps text-label-caps">TIER</th>
+                                <th class="px-6 py-4 font-label-caps text-label-caps">CATEGORIA</th>
                                 <th class="px-6 py-4 font-label-caps text-label-caps">CASHBACK FINAL</th>
                             </tr>
                         </thead>
