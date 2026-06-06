@@ -35,4 +35,12 @@ public class Cliente {
         }
         return total;
     }
+<<<<<<< HEAD
+=======
+    public double getCashBackAcumulado(){return cashBackAcumulado;}
+
+    public String getNomeTier() {
+        return "NORMAL";
+    }
+>>>>>>> parent of 683406f (Revert "Adiciona tipos de cliente por herança")
 }
