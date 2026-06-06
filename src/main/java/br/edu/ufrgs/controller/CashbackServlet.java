@@ -1,4 +1,7 @@
 package br.edu.ufrgs.controller;
+
+import br.edu.ufrgs.persistence.LeitorCSV;
+//import br.edu.ufrgs.persistence.Resultado;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -6,9 +9,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.List;
 
+//private static final Logger logger = LoggerFactory.getLogger(CashbackServlet.class);
 @WebServlet("/processa")
 public class CashbackServlet extends HttpServlet  {
+  @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
           String acao = request.getParameter("acao");
           HttpSession session = request.getSession();
@@ -34,15 +40,15 @@ public class CashbackServlet extends HttpServlet  {
                     .filter(r -> r.getClienteId().equals(filtrarClienteId))
                     .toList();
 
-                request.setAttribute("listaFiltrada", listaFiltrada);
-                else {
-                    request.setAttribute("listaFiltrada", listaCompleta);
-                }
+            request.setAttribute("listaFiltrada", listaFiltrada);
+          } else {
+            request.setAttribute("listaFiltrada", listaCompleta);
+          }
 
-                request.getRequestDispatcher("index.jsp").forward(request, response);
-          
+          request.getRequestDispatcher("index.jsp").forward(request, response);
     }
 
+    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
     }
