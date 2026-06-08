@@ -1,7 +1,0 @@
-| id_venda | cliente_id | nome_cliente | valor    | categoria   |
-|----------|------------|--------------|----------|-------------|
-| V001     | 10         | Alice Silva  | 1200.00  | Eletronicos |
-| V002     | 20         | Bruno Costa  | 200.00   | Vestuario   |
-| V003     | 10         | Alice Silva  | 300.00   | Outros      |
-| V004     | 30         | Carla Souza  | 6000.00  | Eletronicos |
-| V005     | 20         | Bruno Costa  | 150.00   | Vestuario   |

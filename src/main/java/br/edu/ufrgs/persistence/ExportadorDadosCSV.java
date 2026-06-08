@@ -1,51 +1,60 @@
 package br.edu.ufrgs.persistence;
 import br.edu.ufrgs.model.Cliente;
-import br.edu.ufrgs.model.ClienteGold;
-import br.edu.ufrgs.model.ClienteNormal;
-import br.edu.ufrgs.model.ClientePlatinum;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
 public class ExportadorDadosCSV {
+    /**
+     * Metodo reponsavel por exportar uma lista de clientes a um arquivo csv.
+     * @param clientes lista de clientes
+     * @param caminho e o caminho para onde sera exportado o arquivo
+     *
+     * @author Luis Antonio
+     */
 
-    public void ExportaListaCliente(List<Cliente> clientes, String caminho){
+    private static final Logger LOGGER = Logger.getLogger(ExportadorDadosCSV.class.getName());
+
+    public void exportaRelatorio(List<Cliente> clientes, String caminho){
         String formato;
+
+        LOGGER.info("Iniciando exportação CSV para: " + caminho);
+
+        if (clientes == null || clientes.isEmpty()) {
+            LOGGER.warning("Lista de clientes vazia ou nula. Nada será exportado.");
+            return;
+        }
 
         try(FileWriter writer = new FileWriter(caminho) ) {
 
             for (Cliente cliente : clientes) {
-                //lida com o cliente
-                if (cliente instanceof ClienteNormal) {
-                    //faz algo sobre o cliente normal
-                    formato = cliente.getIdCliente() + "," + cliente.getNome() + ","
-                            + cliente.getValorTotalVendas() + ","  + "cashbackAcumulado" + ","  + "NORMAL";
-
-                    writer.write(formato);
-
-                } else if (cliente instanceof ClienteGold) {
-                    //faz algo sobre cliente gold
-                    formato = cliente.getIdCliente() + "," + cliente.getNome() + ","
-                            + cliente.getValorTotalVendas() + ","  + "cashbackAcumulado" + ","  + "GOLD";
-
-                    writer.write(formato);
-
-                } else if (cliente instanceof ClientePlatinum) {
-                    //faz algo sobre cliente platinum
-                    formato = cliente.getIdCliente() + "," + cliente.getNome() + ","
-                            + cliente.getValorTotalVendas() + ","  + "cashbackAcumulado" + ","  + "PLATINUM";
-
-                    writer.write(formato);
-                }
-
+                formato = formatador(cliente);
+                writer.write(formato + System.lineSeparator());
             }
+            LOGGER.info("Exportação concluída com sucesso.");
         } catch (IOException e) {
-            System.out.println("Erro na exportação do arquivo csv");
+            LOGGER.log(Level.SEVERE, "Erro na exportação do arquivo CSV: " + caminho, e);
         }
 
     }
 
+    /**
+     * Metodo responsavel por formatar a string a ser exportada.
+     * @param cliente um cliente que sera exportado
+     * @return formato uma string no formato correto para a exportação
+     *
+     * @author Luis Antonio
+     */
+     private String formatador(Cliente cliente){
+        String formato = cliente.getIdCliente() + "," + cliente.getNome() + ","
+                + cliente.getValorTotalVendas() + ","  + cliente.getCashBackAcumulado() + "," + cliente.getNomeTier();
+
+        return formato;
+     }
 
 
 }
