@@ -8,12 +8,15 @@
     <version>1.0</version>
     <packaging>war</packaging>
 
+<<<<<<< HEAD
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+=======
+>>>>>>> origin/main
     <dependencies>
         <!-- API de Servlet (Tomcat 10+ usa Jakarta 6) -->
         <dependency>
@@ -23,6 +26,7 @@
             <scope>provided</scope>
         </dependency>
 
+<<<<<<< HEAD
         <!-- JSTL API -->
         <dependency>
             <groupId>jakarta.servlet.jsp.jstl</groupId>
@@ -42,6 +46,14 @@
              <artifactId>opencsv</artifactId>
              <version>5.7.1</version>
          </dependency>
+=======
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.10.2</version>
+            <scope>test</scope>
+        </dependency>
+>>>>>>> origin/main
     </dependencies>
 
     <build>
@@ -55,6 +67,34 @@
                     <!-- Evita erro caso o web.xml não exista ainda -->
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.11</version>
+                <executions>
+                <!-- Inicializa o agente do JaCoCo antes dos testes rodarem -->
+                <execution>
+                <id>prepare-agent</id>
+                <goals>
+                <goal>prepare-agent</goal>
+                </goals>
+                </execution>
+                <!-- Gera o relatório HTML após a execução dos testes -->
+                <execution>
+                <id>report</id>
+                <phase>test</phase>
+                <goals>
+                <goal>report</goal>
+                </goals>
+                </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

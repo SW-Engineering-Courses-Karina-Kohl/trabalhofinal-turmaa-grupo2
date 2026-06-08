@@ -2,23 +2,42 @@ package br.edu.ufrgs.persistence;
 
 import br.edu.ufrgs.model.Cliente;
 import br.edu.ufrgs.model.Venda;
+
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import br.edu.ufrgs.persistence.LeitorCSV;
+import br.edu.ufrgs.service.ConsolidadorClientes;
 
 public class GerenciadorDeArquivos {
-    
-    private String separador;
 
+    private LeitorCSV leitor  = new LeitorCSV();
+    private ExportadorDadosCSV exportador = new ExportadorDadosCSV();
+    private ConsolidadorClientes consolidador = new ConsolidadorClientes();
 
-    public GerenciadorDeArquivos(String separador) {
-        this.separador = separador;
+    /**
+     * Metodo responsavel por ler o arquivo csv de vendas.
+     * @param caminhoArquivo é um caminho de onde leremos o arquivo csv de vendas
+     * @return retorna um Collection<Cliente>
+     *
+     * @author Luis Antonio
+     */
+    public Collection<Cliente> lerVendas(String caminhoArquivo) {
+
+        List<String> listaStrings = new ArrayList<>();
+        listaStrings = leitor.lerArquivo(caminhoArquivo);
+
+        return consolidador.consolidar(listaStrings);
     }
 
-    public List<Venda> lerVendas(String caminhoArquivo) {
-        // Lógica para ler o CSV de entrada 
-        return null; 
-    }
-
+    /**
+     *Metodo responsavel por criar o relatorio csv e exporta-lo.
+     * @param clientes é uma lista de clientes a serem exportados
+     * @param caminhoSaida é uma string que diz o caminho para onde sera criado o arquivo que sera exportado
+     *
+     * @author Luis Antonio
+     */
     public void exportarRelatorio(List<Cliente> clientes, String caminhoSaida) {
-        // Lógica para gravar o CSV de saída consolidado 
+        exportador.exportaRelatorio(clientes, caminhoSaida);
     }
 }
