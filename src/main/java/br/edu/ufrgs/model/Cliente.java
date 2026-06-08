@@ -1,4 +1,4 @@
-package br.edu.ufrgs.model;
+﻿package br.edu.ufrgs.model;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,6 +38,7 @@ public class Cliente {
     }
 
     public double getCashBackAcumulado(){return cashBackAcumulado;}
+    public void setCashBackAcumulado(double cashBackAcumulado){this.cashBackAcumulado = cashBackAcumulado;}
 
 
     public String getNomeTier() {
