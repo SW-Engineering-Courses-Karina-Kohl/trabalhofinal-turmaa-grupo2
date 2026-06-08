@@ -16,7 +16,7 @@ public class LeitorCSV {
      *
      * @param caminho caminho do arquivo CSV a ser lido
      * @return lista é uma lista com todas as strings sem formatacao do arquivo retorna
-     * null quando o caminho nao foi encontrado
+     * @return lista vazia quando o caminho nao foi encontrado
      *
      * @author Luis Antonio
      */

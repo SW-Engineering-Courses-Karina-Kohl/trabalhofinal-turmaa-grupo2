@@ -1,6 +1,5 @@
 package br.edu.ufrgs.persistence;
 
-import br.edu.ufrgs.persistence.LeitorCSV;
 import java.util.List;
 import java.util.ArrayList;
 

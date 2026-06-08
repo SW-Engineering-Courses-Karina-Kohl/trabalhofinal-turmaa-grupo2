@@ -29,7 +29,6 @@ public class ExportadorDadosCSV {
         try(FileWriter writer = new FileWriter(caminho) ) {
 
             for (Cliente cliente : clientes) {
-                //lida com o cliente
                 formato = formatador(cliente);
                 writer.write(formato);
             }
