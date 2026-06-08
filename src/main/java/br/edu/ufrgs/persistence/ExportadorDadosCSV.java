@@ -1,27 +1,43 @@
 package br.edu.ufrgs.persistence;
 import br.edu.ufrgs.model.Cliente;
-import br.edu.ufrgs.model.ClienteGold;
-import br.edu.ufrgs.model.ClienteNormal;
-import br.edu.ufrgs.model.ClientePlatinum;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
 public class ExportadorDadosCSV {
+    /**
+     * Metodo reponsavel por exportar uma lista de clientes a um arquivo csv.
+     * @param clientes lista de clientes
+     * @param caminho e o caminho para onde sera exportado o arquivo
+     *
+     * @author Luis Antonio
+     */
 
-    public void ExportaListaCliente(List<Cliente> clientes, String caminho){
+    private static final Logger LOGGER = Logger.getLogger(ExportadorDadosCSV.class.getName());
+
+    public void exportaRelatorio(List<Cliente> clientes, String caminho){
         String formato;
+
+        LOGGER.info("Iniciando exportação CSV para: " + caminho);
+
+        if (clientes == null || clientes.isEmpty()) {
+            LOGGER.warning("Lista de clientes vazia ou nula. Nada será exportado.");
+            return;
+        }
 
         try(FileWriter writer = new FileWriter(caminho) ) {
 
             for (Cliente cliente : clientes) {
                 formato = formatador(cliente);
-                writer.write(formato);
-
+                writer.write(formato + System.lineSeparator());
             }
+            LOGGER.info("Exportação concluída com sucesso.");
         } catch (IOException e) {
-            System.out.println("Erro na exportação do arquivo csv");
+            LOGGER.log(Level.SEVERE, "Erro na exportação do arquivo CSV: " + caminho, e);
         }
 
     }
@@ -35,15 +51,8 @@ public class ExportadorDadosCSV {
      */
      private String formatador(Cliente cliente){
         String formato = cliente.getIdCliente() + "," + cliente.getNome() + ","
-                + cliente.getValorTotalVendas() + ","  + cliente.getCashBackAcumulado() + ",";
+                + cliente.getValorTotalVendas() + ","  + cliente.getCashBackAcumulado() + "," + cliente.getNomeTier();
 
-        if (cliente instanceof ClienteNormal) {
-             formato = formato + "NORMAL";
-        } else if (cliente instanceof ClienteGold) {
-             formato = formato + "GOLD";
-        } else if (cliente instanceof ClientePlatinum) {
-             formato = formato + "PLATINUM";
-        }
         return formato;
      }
 
