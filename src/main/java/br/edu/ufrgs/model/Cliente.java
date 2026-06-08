@@ -36,5 +36,11 @@ public class Cliente {
         }
         return total;
     }
+
     public double getCashBackAcumulado(){return cashBackAcumulado;}
+
+    public String getNomeTier() {
+        return "NORMAL";
+    }
+
 }

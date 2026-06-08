@@ -5,12 +5,8 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Classe responsável pela leitura de arquivos CSV.
- *
- * @author Luis Antonio
- */
 public class LeitorCSV {
+
     /**
      * Método responsável por ler o arquivo CSV
      *
@@ -32,9 +28,8 @@ public class LeitorCSV {
             linha = leitor.readLine();
 
             while(linha != null){
-                lista.add(linha);
                 linha = leitor.readLine();
-
+                lista.add(linha);
             }
             
         }catch(Exception erro) {
