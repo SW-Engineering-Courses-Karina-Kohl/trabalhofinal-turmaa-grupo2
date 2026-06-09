@@ -1,4 +1,4 @@
-﻿package br.edu.ufrgs.model;
+package br.edu.ufrgs.model;
 import java.util.ArrayList;
 import java.util.List;
 

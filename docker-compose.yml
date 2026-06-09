@@ -1,6 +1,8 @@
 services:
   cashback-app:
     build: .
+    volumes:
+      - ./cliente.csv:/dados/cliente.csv:ro
     ports:
       - "8080:8080"
     container_name: cashback-pro-container
