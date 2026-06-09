@@ -49,9 +49,11 @@ public class ExportadorDadosCSV {
      *
      * @author Luis Antonio
      */
-     private String formatador(Cliente cliente){
+        private String formatador(Cliente cliente){
+        String valorVendasFormatado = String.format(java.util.Locale.US, "%.2f", cliente.getValorTotalVendas());
+        String cashbackFormatado = String.format(java.util.Locale.US, "%.2f", cliente.getCashBackAcumulado());
         String formato = cliente.getIdCliente() + "," + cliente.getNome() + ","
-                + cliente.getValorTotalVendas() + ","  + cliente.getCashBackAcumulado() + "," + cliente.getNomeTier();
+            + valorVendasFormatado + ","  + cashbackFormatado + "," + cliente.getNomeTier();
 
         return formato;
      }
