@@ -37,6 +37,14 @@ public class Cliente {
         return total;
     }
 
+    public double getTotalComprado() {
+        return getValorTotalVendas();
+    }
+
+    public String getTier() {
+        return getNomeTier();
+    }
+
     public double getCashBackAcumulado(){return cashBackAcumulado;}
     public void setCashBackAcumulado(double cashBackAcumulado){this.cashBackAcumulado = cashBackAcumulado;}
 
