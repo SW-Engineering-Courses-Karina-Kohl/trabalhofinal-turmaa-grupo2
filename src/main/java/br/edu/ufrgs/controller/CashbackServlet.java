@@ -1,140 +1,159 @@
 package br.edu.ufrgs.controller;
 
-import br.edu.ufrgs.persistence.LeitorCSV;
 import br.edu.ufrgs.model.Cliente;
+import br.edu.ufrgs.persistence.LeitorCSV;
 import br.edu.ufrgs.persistence.ExportadorDadosCSV;
 import br.edu.ufrgs.service.CalculadoraCashback;
 import br.edu.ufrgs.service.ConsolidadorClientes;
 import br.edu.ufrgs.service.FabricaCliente;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 @WebServlet("/processa")
+@MultipartConfig // Ativa o suporte para receber arquivos binários do formulário JSP
 public class CashbackServlet extends HttpServlet {
 
     /**
-     * O doPost é acionado quando o usuário envia o arquivo CSV na tela.
-     * Ele lê, calcula as regras de cashback/tier e salva o resultado na sessão.
+     * O doPost é acionado quando o usuário seleciona e envia o arquivo CSV na tela.
+     * Ele cria um arquivo temporário dinâmico no SO para garantir as permissões no Docker.
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // Pega o caminho do arquivo enviado pelo formulário do JSP
-        String caminhoArquivo = request.getParameter("caminhoArquivo");
-
-        if (caminhoArquivo == null || caminhoArquivo.isEmpty()) {
-            request.setAttribute("erro", "Por favor, informe o caminho do arquivo CSV.");
-            request.getRequestDispatcher("index.jsp").forward(request, response);
-            return;
-        }
-
+        java.nio.file.Path localDestino = null;
         try {
+            // 1. Captura o arquivo vindo do input 'name="arquivo"' do index.jsp
+            Part filePart = request.getPart("arquivo"); 
+
+            if (filePart == null || filePart.getSize() == 0) {
+                request.setAttribute("erro", "Por favor, selecione um arquivo CSV válido.");
+                request.getRequestDispatcher("index.jsp").forward(request, response);
+                return;
+            }
+
+            // CORREÇÃO: Cria um arquivo temporário em uma área segura e 100% gravável pelo SO do Container
+            localDestino = java.nio.file.Files.createTempFile("upload_temporario_", ".csv");
+            String caminhoCompleto = localDestino.toAbsolutePath().toString(); 
+
+            // 3. Salva fisicamente os bytes do upload nesse arquivo temporário dinâmico
+            try (InputStream input = filePart.getInputStream()) {
+                java.nio.file.Files.copy(input, localDestino, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            }
+
+            // 4. Utiliza a função original do Luis passando a String do caminho dinâmico obtido
             LeitorCSV leitorCSV = new LeitorCSV();
-            
-            // 1. Link do Backend: Lê o arquivo de vendas brutas
-            List<String> vendasBrutas = leitorCSV.lerArquivo(caminhoArquivo); 
+            List<String> vendasBrutas = leitorCSV.lerArquivo(caminhoCompleto); 
 
-                        if (vendasBrutas.isEmpty()) {
-                                request.setAttribute("erro", "Nenhum dado foi lido do CSV. Confira se o caminho está correto e se o arquivo está montado no container.");
-                                request.getRequestDispatcher("index.jsp").forward(request, response);
-                                return;
-                        }
+            // 5. Exclui o arquivo temporário imediatamente após a leitura para liberar espaço
+            java.nio.file.Files.deleteIfExists(localDestino);
 
+            // 6. Consolida as linhas de texto brutas em objetos Cliente genéricos
             ConsolidadorClientes consolidador = new ConsolidadorClientes();
             Collection<Cliente> clientesConsolidados = consolidador.consolidar(vendasBrutas);
+            
+            // 7. Prepara o motor de regras com a Fábrica e a Calculadora
+            FabricaCliente fabrica = new FabricaCliente();
+            CalculadoraCashback calculadora = new CalculadoraCashback();
+            List<Cliente> listaCalculada = new ArrayList<>();
 
-                        FabricaCliente fabricaCliente = new FabricaCliente();
-                        List<Cliente> listaCalculada = new ArrayList<>();
-                        for (Cliente clienteOriginal : clientesConsolidados) {
-                                Cliente cliente = fabricaCliente.fabricarCliente(clienteOriginal);
+            // 8. Loop de Negócio: Transforma clientes genéricos em instâncias reais de Tiers via polimorfismo
+            for (Cliente cOriginal : clientesConsolidados) {
+                Cliente clienteTipado = fabrica.fabricarCliente(cOriginal);
+                clienteTipado.setCashBackAcumulado(calculadora.calcularCashbackFinal(clienteTipado));
+                listaCalculada.add(clienteTipado);
+            }
 
-                                // 2. Link do Backend: Processa o motor de regras e devolve a lista de clientes consolidados
-                                CalculadoraCashback calculadora = new CalculadoraCashback();
-                                cliente.setCashBackAcumulado(calculadora.calcularCashbackFinal(cliente));
-                                listaCalculada.add(cliente);
-                        }
-
-
-            // 3. Salva a lista gerada na sessão para o doGet poder usá-la
+            // 9. Armazena o estado completo na Sessão para o fluxo de renderização (doGet)
             HttpSession session = request.getSession();
             session.setAttribute("listaCompleta", listaCalculada);
 
-            // 4. Redireciona para o doGet exibir os dados na tela com segurança (Padrão Post-Redirect-Get)
+            // Padrão Post-Redirect-Get: Redireciona com segurança limpando a requisição POST
             response.sendRedirect("processa");
 
         } catch (Exception e) {
+            // Bloco de segurança para garantir que o arquivo seja deletado caso o processamento falhe no meio
+            if (localDestino != null) {
+                java.nio.file.Files.deleteIfExists(localDestino);
+            }
             request.setAttribute("erro", "Erro ao processar o arquivo: " + e.getMessage());
             request.getRequestDispatcher("index.jsp").forward(request, response);
         }
     }
 
+    /**
+     * O doGet gerencia a exibição da interface, buscas com filtro e download do relatório.
+     */
     @Override
-protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-    HttpSession session = request.getSession();
-    
-    // 1. Recupera a lista calculada da sessão
-    List<Cliente> listaCompleta = (List<Cliente>) session.getAttribute("listaCompleta");
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        List<Cliente> listaCompleta = (List<Cliente>) session.getAttribute("listaCompleta");
 
-    if (listaCompleta == null) {
+        if (listaCompleta == null) {
+            request.getRequestDispatcher("index.jsp").forward(request, response);
+            return;
+        }
+
+        String acao = request.getParameter("acao");
+
+        // RF05 - Fluxo de exportação do arquivo final CSV para o usuário sem caminhos fixos
+        if ("exportar".equals(acao)) {
+            java.nio.file.Path pathRelatorio = null;
+            try {
+                // CORREÇÃO: Cria um arquivo temporário dinâmico também para a geração do relatório do Luis
+                pathRelatorio = java.nio.file.Files.createTempFile("relatorio_fidelidade_", ".csv");
+                String caminhoNoServidor = pathRelatorio.toAbsolutePath().toString();
+
+                // Executa o exportador do Luis gerando o arquivo com o formatador dele
+                ExportadorDadosCSV escritorCSV = new ExportadorDadosCSV();
+                escritorCSV.exportaRelatorio(listaCompleta, caminhoNoServidor);
+
+                // Seta os cabeçalhos HTTP para forçar a janela de download no navegador do usuário
+                response.setContentType("text/csv");
+                response.setHeader("Content-Disposition", "attachment; filename=\"relatorio_fidelidade.csv\"");
+                
+                // Faz a ponte de streaming transferindo o arquivo gerado pelo Luis direto para a resposta HTTP
+                java.nio.file.Files.copy(pathRelatorio, response.getOutputStream());
+                response.getOutputStream().flush();
+                
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                // Garante que o arquivo temporário do relatório seja apagado após o download terminar
+                if (pathRelatorio != null) {
+                    java.nio.file.Files.deleteIfExists(pathRelatorio);
+                }
+            }
+            return;
+        }
+
+        // RF04 - Motor de busca e filtragem por ID do cliente
+        String filtrarClienteId = request.getParameter("clienteId");
+        List<Cliente> listaParaExibicao;
+
+        if (filtrarClienteId != null && !filtrarClienteId.isEmpty()) {
+            try {
+                int idFiltro = Integer.parseInt(filtrarClienteId);
+                listaParaExibicao = listaCompleta.stream()
+                        .filter(r -> r.getIdCliente() == idFiltro)
+                        .toList();
+            } catch (NumberFormatException ex) {
+                listaParaExibicao = new ArrayList<>();
+            }
+        } else {
+            listaParaExibicao = listaCompleta;
+        }
+
+        request.setAttribute("listaFiltrada", listaParaExibicao);
         request.getRequestDispatcher("index.jsp").forward(request, response);
-        return;
     }
-
-    String acao = request.getParameter("acao");
-
-    // RF05 - Exportar arquivo final CSV
-    if ("exportar".equals(acao)) {
-        // Caminho temporário gravável dentro do container/runtime
-        String caminhoNoServidor = Paths.get(System.getProperty("java.io.tmpdir"), "relatorio_fidelidade.csv").toString();
-
-        // INSTÂNCIA E MÉTODO DO LUIS: Mantidos exatamente como ele criou (Lista + String caminho)
-        ExportadorDadosCSV escritorCSV = new ExportadorDadosCSV();
-        escritorCSV.exportaRelatorio(listaCompleta, caminhoNoServidor);
-
-        // CONFIGURAÇÃO HTTP: Avisa o navegador que um arquivo CSV está chegando para download
-        response.setContentType("text/csv");
-        response.setHeader("Content-Disposition", "attachment; filename=\"relatorio_fidelidade.csv\"");
-        
-        // FLUXO DE TRANSMISSÃO: Pega o arquivo gerado pelo Luis no HD e transmite para o usuário
-        Path path = Paths.get(caminhoNoServidor);
-        try {
-            Files.copy(path, response.getOutputStream());
-            response.getOutputStream().flush();
-        } catch (IOException e) {
-            // Se der erro ao ler o arquivo, joga para o console para debug
-            e.printStackTrace();
-        }
-        return;
-    }
-
-    // RF04 - Filtrar por cliente_id ou listar tudo
-    String filtrarClienteId = request.getParameter("clienteId");
-    List<Cliente> listaParaExibicao;
-
-    if (filtrarClienteId != null && !filtrarClienteId.isEmpty()) {
-        try {
-            int idFiltro = Integer.parseInt(filtrarClienteId);
-            listaParaExibicao = listaCompleta.stream()
-                    .filter(r -> r.getIdCliente() == idFiltro)
-                    .toList();
-        } catch (NumberFormatException ex) {
-            listaParaExibicao = new ArrayList<>();
-        }
-    } else {
-        listaParaExibicao = listaCompleta;
-    }
-
-    request.setAttribute("listaFiltrada", listaParaExibicao);
-    request.getRequestDispatcher("index.jsp").forward(request, response);
-}
 }

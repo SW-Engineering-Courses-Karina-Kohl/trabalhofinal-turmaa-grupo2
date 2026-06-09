@@ -172,12 +172,17 @@
             <section id="upload" class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
                 <div class="lg:col-span-12">
                     <div class="bg-white rounded-xl border border-outline-variant p-card-padding shadow-sm hover:shadow-md transition-shadow">
-                        <form action="processa" method="POST" class="flex flex-col md:flex-row items-end gap-gutter w-full">
+                        
+                        <%-- FORMULÁRIO ATUALIZADO: Usando multipart/form-data para upload binário --%>
+                        <form action="processa" method="POST" enctype="multipart/form-data" class="flex flex-col md:flex-row items-end gap-gutter w-full">
                             <div class="w-full md:w-2/3">
-                                    <label for="caminhoArquivo" class="block text-sm font-bold text-slate-800 mb-2">Caminho do Arquivo CSV no Servidor/Container:</label>
-                                    <input id="caminhoArquivo" name="caminhoArquivo" type="text" placeholder="Ex: /dados/cliente.csv" 
-                                       class="w-full px-4 py-3 border border-outline-variant rounded-xl bg-surface-container-low focus:ring-2 focus:ring-primary/20 focus:outline-none font-mono text-sm shadow-inner"/>
-                                    <p class="text-xs text-outline mt-2">No Docker, use o caminho montado no container, por exemplo /dados/cliente.csv.</p>
+                                <label for="csvFile" class="block text-sm font-bold text-slate-800 mb-2">Selecione o arquivo CSV do seu computador:</label>
+                                
+                                <%-- INPUT ATUALIZADO: Tipo file para carregar o arquivo direto do HD do usuário --%>
+                                <input id="csvFile" name="arquivo" type="file" accept=".csv" 
+                                       class="w-full px-4 py-3 border border-outline-variant rounded-xl bg-surface-container-low focus:ring-2 focus:ring-primary/20 focus:outline-none text-sm font-mono shadow-inner"/>
+                                
+                                <p class="text-xs text-outline mt-2">O arquivo enviado será processado temporariamente em memória pelo servidor.</p>
                             </div>
                             <div class="w-full md:w-1/3 flex flex-col gap-4">
                                 <button class="w-full py-4 bg-primary text-on-primary rounded-xl font-bold hover:brightness-110 active:scale-[0.98] transition-all shadow-lg shadow-primary/30" type="submit">
@@ -185,6 +190,7 @@
                                 </button>
                             </div>
                         </form>
+                        
                     </div>
                 </div>
             </section>
@@ -241,17 +247,17 @@
                                         </c:choose>
                                     </td>
                                     <td class="px-6 py-4 font-bold text-primary">
-                                        R$ <fmt:formatNumber value="${cliente.cashBackAcumulado}" minFractionDigits="2"/>
+                                        R$ <fmt:formatNumber value="${cliente.cashBackAcumulado}" minFractionDigits="2" maxFractionDigits="2"/>
                                     </td>
                                 </tr>
                             </c:forEach>
 
-                            <%-- Tela Amigável de Estado Vazio --%>
+                            <%-- Tela de Estado Vazio --%>
                             <c:if test="${empty listaFiltrada}">
                                 <tr>
                                     <td colspan="5" class="px-6 py-20 text-center text-slate-400">
                                         <span class="material-symbols-outlined text-5xl mb-4 block">upload_file</span>
-                                        Nenhum dado processado. Informe o caminho do arquivo CSV acima e clique em Iniciar.
+                                        Nenhum dado processado. Selecione o arquivo CSV acima e clique em Iniciar.
                                     </td>
                                 </tr>
                             </c:if>
@@ -269,7 +275,7 @@
                         </div>
                         <div>
                             <h4 class="font-bold text-on-surface">Integridade confirmada</h4>
-                            <p class="text-sm text-on-surface-variant">Cálculos verificados com sucesso pelo motor de regras sênior.</p>
+                            <p class="text-sm text-on-surface-variant">Cálculos verificados com sucesso pelo motor de regras.</p>
                         </div>
                     </div>
                     <div class="flex gap-4">
