@@ -1,12 +1,9 @@
 package br.edu.ufrgs.persistence;
 
 import br.edu.ufrgs.model.Cliente;
-import br.edu.ufrgs.model.Venda;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import br.edu.ufrgs.persistence.LeitorCSV;
 import br.edu.ufrgs.service.ConsolidadorClientes;
 
 public class GerenciadorDeArquivos {

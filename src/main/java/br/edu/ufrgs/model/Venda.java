@@ -18,13 +18,8 @@ public class Venda {
     public double getValor() {
         return valor;
     }
-<<<<<<< HEAD
-    public CategoriaProduto getCategoria() { // Ou String, dependendo de como tipou
-    return this.categoria;
-=======
 
     public CategoriaProduto getCategoria() {
         return categoria;
->>>>>>> origin/main
     }
 }
