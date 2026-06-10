@@ -96,6 +96,14 @@ public class CashbackServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
+        String acao = request.getParameter("acao");
+        
+        if ("limpar".equals(acao)) {
+            session.removeAttribute("listaCompleta");
+            response.sendRedirect("processa");
+            return;
+        }
+
         List<Cliente> listaCompleta = (List<Cliente>) session.getAttribute("listaCompleta");
 
         if (listaCompleta == null) {
@@ -103,7 +111,7 @@ public class CashbackServlet extends HttpServlet {
             return;
         }
 
-        String acao = request.getParameter("acao");
+        
 
         // RF05 - Fluxo de exportação do arquivo final CSV para o usuário sem caminhos fixos
         if ("exportar".equals(acao)) {

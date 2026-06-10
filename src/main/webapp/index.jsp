@@ -135,7 +135,7 @@
             </a>
         </nav>
         <div class="mt-auto px-2 space-y-1">
-            <a href="processa" class="w-full flex items-center justify-center gap-2 bg-primary text-on-primary py-3 rounded-xl font-bold text-sm mb-4 transition-transform active:scale-95 shadow-lg shadow-primary/20">
+            <a href="processa?acao=limpar" class="w-full flex items-center justify-center gap-2 bg-primary text-on-primary py-3 rounded-xl font-bold text-sm mb-4 transition-transform active:scale-95 shadow-lg shadow-primary/20">
                 <span class="material-symbols-outlined">refresh</span>
                 Limpar / Nova Analise
             </a>
