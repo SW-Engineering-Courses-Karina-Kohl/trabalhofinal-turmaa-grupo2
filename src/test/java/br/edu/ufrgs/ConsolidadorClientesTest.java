@@ -71,4 +71,26 @@ public class ConsolidadorClientesTest {
 
         assertTrue(clientes.isEmpty());
     }
+
+    @Test
+    public void deveIgnorarLinhasMalFormatadasEProcessarAsValidas() {
+        ConsolidadorClientes consolidador = new ConsolidadorClientes();
+        List<String> linhasCSV = Arrays.asList(
+            "V001,10,Alice,100.00,Eletronicos",  // linha valida
+            "V002,20,FaltaColuna,300.00",        // coluna faltando
+            "V003,abc,IdInvalido,400.00,Outros", // id nao numerico
+            "V004,30,ValorInvalido,xyz,Vestuario", // valor nao numerico
+            "",                                   // linha vazia
+            "V005,10,Alice,200.00,Outros"        // linha valida
+        );
+        Collection<Cliente> clientes = consolidador.consolidar(linhasCSV);
+        // Apenas a Alice (id 10) deve ser processada, com 2 vendas validas
+        assertEquals(1, clientes.size());
+        Cliente alice = clientes.iterator().next();
+        assertEquals(10, alice.getIdCliente());
+        assertEquals(2, alice.getVendas().size());
+        assertEquals(300.00, alice.getValorTotalVendas(), 0.001);
+    }
+
+    
 }
