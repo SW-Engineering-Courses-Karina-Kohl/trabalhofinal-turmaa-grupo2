@@ -6,13 +6,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Servico responsavel por consolidar as vendas lidas do CSV,
+ * agrupando por cliente. Cada cliente recebe todas as suas vendas
+ * reunidas em um unico objeto.
+ */
 public class ConsolidadorClientes{
 
     /**
      * Recebe as linhas lidas do CSV e agrupa as vendas
      * pertencentes ao mesmo cliente. Linhas mal formatadas
      * (colunas faltando, valores invalidos ou vazias) sao ignoradas.
+     *
+     * @param linhasCSV a lista de linhas de texto lidas do arquivo CSV
+     * @return uma colecao de clientes com suas vendas agrupadas
      */
+
     public Collection<Cliente> consolidar (List<String> linhasCSV){
         Map<Integer, Cliente> clientesMap = new HashMap<>();
 
