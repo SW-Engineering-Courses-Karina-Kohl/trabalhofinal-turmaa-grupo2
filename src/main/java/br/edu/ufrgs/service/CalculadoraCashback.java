@@ -3,7 +3,20 @@ package br.edu.ufrgs.service;
 import br.edu.ufrgs.model.Cliente;
 import br.edu.ufrgs.model.Venda;
 
+/**
+ * Motor de calculo de cashback do sistema de fidelidade.
+ * Responsavel por aplicar as regras de negocio: cashback por
+ * categoria de produto e bonus progressivo por nivel de fidelidade (Tier).
+ */
+
 public class CalculadoraCashback {
+    /**
+     * Calcula o cashback de uma venda com base na categoria do produto.
+     * Eletronicos retornam 5%, Vestuario 3% e demais categorias 1%.
+     *
+     * @param v a venda a ser avaliada
+     * @return o valor de cashback correspondente a categoria da venda
+     */
 
     public double calcularCashbackCategoria(Venda v) {
         double valor = v.getValor();
@@ -18,6 +31,17 @@ public class CalculadoraCashback {
         }
     }
 
+     /**
+     * Calcula o bonus adicional de acordo com o Tier do cliente,
+     * definido pelo valor total de suas compras.
+     * Platinum (acima de R$ 5.000): R$ 50 fixo mais 2% do total.
+     * Gold (acima de R$ 1.000): R$ 50 fixo.
+     * Normal (ate R$ 1.000): sem bonus.
+     *
+     * @param c o cliente cujo bonus sera calculado
+     * @return o valor do bonus correspondente ao Tier do cliente
+     */
+
     public double calcularBonusTier(Cliente c) {
         double gastoTotal = c.getValorTotalVendas();
         
@@ -28,6 +52,14 @@ public class CalculadoraCashback {
         }
         return 0.00;
     }
+
+    /**
+     * Calcula o cashback final do cliente, somando o cashback de
+     * todas as suas vendas (por categoria) com o bonus do Tier.
+     *
+     * @param c o cliente cujo cashback total sera calculado
+     * @return o valor total de cashback acumulado pelo cliente
+     */
 
     public double calcularCashbackFinal(Cliente c) {
         double totalCategorias = 0;
