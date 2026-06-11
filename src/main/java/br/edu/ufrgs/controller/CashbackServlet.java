@@ -19,7 +19,14 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
+/**
+ * Controlador principal (Controller) responsável pelo gerenciamento do fluxo
+ * de processamento, consolidação e filtragem de cashbacks de clientes.
+ * * <p>Esta classe estende {@link HttpServlet} e atua como intermediária entre a 
+ * interface do usuário (JSP) e a camada de regras de negócio, gerenciando o ciclo
+ * de vida das requisições de upload de arquivos CSV e gerência de estado via sessão.</p>
+ * @author Grupo 2 - Turma A
+ */
 @WebServlet("/processa")
 @MultipartConfig // Ativa o suporte para receber arquivos binários do formulário JSP
 public class CashbackServlet extends HttpServlet {
@@ -41,7 +48,7 @@ public class CashbackServlet extends HttpServlet {
                 return;
             }
 
-            // CORREÇÃO: Cria um arquivo temporário em uma área segura e 100% gravável pelo SO do Container
+            // Cria um arquivo temporário em uma área segura e 100% gravável pelo SO do Container
             localDestino = java.nio.file.Files.createTempFile("upload_temporario_", ".csv");
             String caminhoCompleto = localDestino.toAbsolutePath().toString(); 
 
@@ -50,7 +57,7 @@ public class CashbackServlet extends HttpServlet {
                 java.nio.file.Files.copy(input, localDestino, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
             }
 
-            // 4. Utiliza a função original do Luis passando a String do caminho dinâmico obtido
+            // 4. Utiliza a função original LeitorCSV passando a String do caminho dinâmico obtido
             LeitorCSV leitorCSV = new LeitorCSV();
             List<String> vendasBrutas = leitorCSV.lerArquivo(caminhoCompleto); 
 
@@ -97,7 +104,7 @@ public class CashbackServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
         String acao = request.getParameter("acao");
-        
+        //botao para limpar os dados deixados pelo csv
         if ("limpar".equals(acao)) {
             session.removeAttribute("listaCompleta");
             response.sendRedirect("processa");
@@ -117,11 +124,11 @@ public class CashbackServlet extends HttpServlet {
         if ("exportar".equals(acao)) {
             java.nio.file.Path pathRelatorio = null;
             try {
-                // CORREÇÃO: Cria um arquivo temporário dinâmico também para a geração do relatório do Luis
+                //Cria um arquivo temporário dinâmico também para a geração do relatório ExportadorCSV
                 pathRelatorio = java.nio.file.Files.createTempFile("relatorio_fidelidade_", ".csv");
                 String caminhoNoServidor = pathRelatorio.toAbsolutePath().toString();
 
-                // Executa o exportador do Luis gerando o arquivo com o formatador dele
+                // Executa o exportadorCSV gerando o arquivo com o formatador dele
                 ExportadorDadosCSV escritorCSV = new ExportadorDadosCSV();
                 escritorCSV.exportaRelatorio(listaCompleta, caminhoNoServidor);
 
@@ -129,7 +136,7 @@ public class CashbackServlet extends HttpServlet {
                 response.setContentType("text/csv");
                 response.setHeader("Content-Disposition", "attachment; filename=\"relatorio_fidelidade.csv\"");
                 
-                // Faz a ponte de streaming transferindo o arquivo gerado pelo Luis direto para a resposta HTTP
+                // Faz a ponte de streaming transferindo o arquivo gerado pelo ExportadorCSV direto para a resposta HTTP
                 java.nio.file.Files.copy(pathRelatorio, response.getOutputStream());
                 response.getOutputStream().flush();
                 
