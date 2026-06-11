@@ -1,10 +1,9 @@
 package br.edu.ufrgs.controller;
 
 import br.edu.ufrgs.model.Cliente;
-import br.edu.ufrgs.persistence.LeitorCSV;
+import br.edu.ufrgs.persistence.GerenciadorDeArquivos;
 import br.edu.ufrgs.persistence.ExportadorDadosCSV;
 import br.edu.ufrgs.service.CalculadoraCashback;
-import br.edu.ufrgs.service.ConsolidadorClientes;
 import br.edu.ufrgs.service.FabricaCliente;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -21,67 +20,62 @@ import java.util.Collection;
 import java.util.List;
 
 @WebServlet("/processa")
-@MultipartConfig // Ativa o suporte para receber arquivos binários do formulário JSP
+@MultipartConfig
 public class CashbackServlet extends HttpServlet {
 
     /**
-     * O doPost é acionado quando o usuário seleciona e envia o arquivo CSV na tela.
-     * Ele cria um arquivo temporário dinâmico no SO para garantir as permissões no Docker.
+     * O doPost e acionado quando o usuario seleciona e envia o arquivo CSV na tela.
+     * Ele cria um arquivo temporario dinamico no SO para garantir as permissoes no Docker.
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         java.nio.file.Path localDestino = null;
         try {
             // 1. Captura o arquivo vindo do input 'name="arquivo"' do index.jsp
-            Part filePart = request.getPart("arquivo"); 
+            Part filePart = request.getPart("arquivo");
 
             if (filePart == null || filePart.getSize() == 0) {
-                request.setAttribute("erro", "Por favor, selecione um arquivo CSV válido.");
+                request.setAttribute("erro", "Por favor, selecione um arquivo CSV valido.");
                 request.getRequestDispatcher("index.jsp").forward(request, response);
                 return;
             }
 
-            // CORREÇÃO: Cria um arquivo temporário em uma área segura e 100% gravável pelo SO do Container
+            // 2. Cria um arquivo temporario em uma area gravavel pelo SO do Container
             localDestino = java.nio.file.Files.createTempFile("upload_temporario_", ".csv");
-            String caminhoCompleto = localDestino.toAbsolutePath().toString(); 
+            String caminhoCompleto = localDestino.toAbsolutePath().toString();
 
-            // 3. Salva fisicamente os bytes do upload nesse arquivo temporário dinâmico
+            // 3. Salva fisicamente os bytes do upload nesse arquivo temporario
             try (InputStream input = filePart.getInputStream()) {
                 java.nio.file.Files.copy(input, localDestino, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
             }
 
-            // 4. Utiliza a função original do Luis passando a String do caminho dinâmico obtido
-            LeitorCSV leitorCSV = new LeitorCSV();
-            List<String> vendasBrutas = leitorCSV.lerArquivo(caminhoCompleto); 
+            // 4. Le e consolida os clientes usando o Gerenciador (que orquestra Leitor + Consolidador)
+            GerenciadorDeArquivos gerenciador = new GerenciadorDeArquivos();
+            Collection<Cliente> clientesConsolidados = gerenciador.lerVendas(caminhoCompleto);
 
-            // 5. Exclui o arquivo temporário imediatamente após a leitura para liberar espaço
+            // 5. Exclui o arquivo temporario apos a leitura para liberar espaco
             java.nio.file.Files.deleteIfExists(localDestino);
 
-            // 6. Consolida as linhas de texto brutas em objetos Cliente genéricos
-            ConsolidadorClientes consolidador = new ConsolidadorClientes();
-            Collection<Cliente> clientesConsolidados = consolidador.consolidar(vendasBrutas);
-            
-            // 7. Prepara o motor de regras com a Fábrica e a Calculadora
+            // 6. Prepara o motor de regras com a Fabrica e a Calculadora
             FabricaCliente fabrica = new FabricaCliente();
             CalculadoraCashback calculadora = new CalculadoraCashback();
             List<Cliente> listaCalculada = new ArrayList<>();
 
-            // 8. Loop de Negócio: Transforma clientes genéricos em instâncias reais de Tiers via polimorfismo
+            // 7. Loop de Negocio: transforma clientes genericos em instancias reais de Tiers via polimorfismo
             for (Cliente cOriginal : clientesConsolidados) {
                 Cliente clienteTipado = fabrica.fabricarCliente(cOriginal);
                 clienteTipado.setCashBackAcumulado(calculadora.calcularCashbackFinal(clienteTipado));
                 listaCalculada.add(clienteTipado);
             }
 
-            // 9. Armazena o estado completo na Sessão para o fluxo de renderização (doGet)
+            // 8. Armazena o estado na Sessao para o fluxo de renderizacao (doGet)
             HttpSession session = request.getSession();
             session.setAttribute("listaCompleta", listaCalculada);
 
-            // Padrão Post-Redirect-Get: Redireciona com segurança limpando a requisição POST
+            // Padrao Post-Redirect-Get: redireciona com seguranca limpando a requisicao POST
             response.sendRedirect("processa");
 
         } catch (Exception e) {
-            // Bloco de segurança para garantir que o arquivo seja deletado caso o processamento falhe no meio
             if (localDestino != null) {
                 java.nio.file.Files.deleteIfExists(localDestino);
             }
@@ -91,13 +85,13 @@ public class CashbackServlet extends HttpServlet {
     }
 
     /**
-     * O doGet gerencia a exibição da interface, buscas com filtro e download do relatório.
+     * O doGet gerencia a exibicao da interface, buscas com filtro e download do relatorio.
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
         String acao = request.getParameter("acao");
-        
+
         if ("limpar".equals(acao)) {
             session.removeAttribute("listaCompleta");
             response.sendRedirect("processa");
@@ -111,32 +105,25 @@ public class CashbackServlet extends HttpServlet {
             return;
         }
 
-        
-
-        // RF05 - Fluxo de exportação do arquivo final CSV para o usuário sem caminhos fixos
+        // RF05 - Fluxo de exportacao do arquivo final CSV para o usuario
         if ("exportar".equals(acao)) {
             java.nio.file.Path pathRelatorio = null;
             try {
-                // CORREÇÃO: Cria um arquivo temporário dinâmico também para a geração do relatório do Luis
                 pathRelatorio = java.nio.file.Files.createTempFile("relatorio_fidelidade_", ".csv");
                 String caminhoNoServidor = pathRelatorio.toAbsolutePath().toString();
 
-                // Executa o exportador do Luis gerando o arquivo com o formatador dele
                 ExportadorDadosCSV escritorCSV = new ExportadorDadosCSV();
                 escritorCSV.exportaRelatorio(listaCompleta, caminhoNoServidor);
 
-                // Seta os cabeçalhos HTTP para forçar a janela de download no navegador do usuário
                 response.setContentType("text/csv");
                 response.setHeader("Content-Disposition", "attachment; filename=\"relatorio_fidelidade.csv\"");
-                
-                // Faz a ponte de streaming transferindo o arquivo gerado pelo Luis direto para a resposta HTTP
+
                 java.nio.file.Files.copy(pathRelatorio, response.getOutputStream());
                 response.getOutputStream().flush();
-                
+
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
-                // Garante que o arquivo temporário do relatório seja apagado após o download terminar
                 if (pathRelatorio != null) {
                     java.nio.file.Files.deleteIfExists(pathRelatorio);
                 }
