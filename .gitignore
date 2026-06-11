@@ -1,0 +1,14 @@
+﻿# Pasta de build do Maven (arquivos compilados, gerados automaticamente)
+target/
+
+# Arquivos de IDE
+.idea/
+.vscode/
+*.iml
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db
+
+# Arquivos de teste locais (CSVs de exemplo)
+teste_*.csv
