@@ -7,10 +7,18 @@ import java.util.List;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
+/**
+ * Classe responsavel por ler um arquivo CSV e devolver
+ * suas linhas como uma lista de strings, ignorando o cabecalho.
+ */
 public class LeitorCSV {
 
-    /**
+  
+
+    private static final Logger LOGGER = Logger.getLogger(LeitorCSV.class.getName());
+
+
+  /**
      * Método responsável por ler o arquivo CSV.
      *
      * @param caminho caminho do arquivo CSV a ser lido
@@ -19,9 +27,6 @@ public class LeitorCSV {
      *
      * @author Luis Antonio
      */
-
-    private static final Logger LOGGER = Logger.getLogger(LeitorCSV.class.getName());
-
     public List<String> lerArquivo(String caminho){
         BufferedReader leitor = null;
         List<String> lista = new ArrayList<>(); //cria uma lista de strings

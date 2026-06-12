@@ -5,12 +5,20 @@ import br.edu.ufrgs.model.Venda;
 import br.edu.ufrgs.model.ClientePlatinum;
 import br.edu.ufrgs.model.ClienteGold; 
 import br.edu.ufrgs.model.ClienteNormal;
-
+/**
+ * Fabrica responsavel por criar o tipo correto de cliente
+ * (Normal, Gold ou Platinum) com base no valor total de compras,
+ * aplicando o padrao de projeto Factory.
+ */
 public class FabricaCliente {
 
-     /**
+
+    /**
      * Recebe um cliente original e cria um novo cliente do tipo adequado
      * com base no valor total das vendas do cliente original.
+     *
+     * @param clienteOriginal o cliente generico com suas vendas
+     * @return um cliente do tipo correto (Normal, Gold ou Platinum) com as vendas copiadas
      */
     public Cliente fabricarCliente (Cliente clienteOriginal){
         double valorTotalVendas = clienteOriginal.getValorTotalVendas();

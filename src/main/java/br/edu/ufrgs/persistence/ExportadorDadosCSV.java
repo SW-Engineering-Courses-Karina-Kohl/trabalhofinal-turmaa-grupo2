@@ -7,18 +7,22 @@ import java.util.logging.Logger;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
-
+/**
+ * Classe responsavel por exportar a lista de clientes processados
+ * para um arquivo CSV de saida, no formato do relatorio de fidelidade.
+ */
 public class ExportadorDadosCSV {
-    /**
+   
+
+    private static final Logger LOGGER = Logger.getLogger(ExportadorDadosCSV.class.getName());
+
+     /**
      * Metodo reponsavel por exportar uma lista de clientes a um arquivo csv.
      * @param clientes lista de clientes
      * @param caminho e o caminho para onde sera exportado o arquivo
      *
      * @author Luis Antonio
      */
-
-    private static final Logger LOGGER = Logger.getLogger(ExportadorDadosCSV.class.getName());
-
     public void exportaRelatorio(List<Cliente> clientes, String caminho){
         String formato;
 
