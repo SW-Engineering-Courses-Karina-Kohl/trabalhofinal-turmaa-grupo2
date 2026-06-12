@@ -64,7 +64,7 @@ public class CashbackServlet extends HttpServlet {
             // 5. Exclui o arquivo temporário imediatamente após a leitura para liberar espaço
             java.nio.file.Files.deleteIfExists(localDestino);
 
-            // 6. Consolida as linhas de texto brutas em objetos Cliente genéricos
+            // 6. Consolida as linhas de texto brutas em objetos Cliente 
             ConsolidadorClientes consolidador = new ConsolidadorClientes();
             Collection<Cliente> clientesConsolidados = consolidador.consolidar(vendasBrutas);
             
