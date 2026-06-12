@@ -73,7 +73,7 @@ public class CashbackServlet extends HttpServlet {
             CalculadoraCashback calculadora = new CalculadoraCashback();
             List<Cliente> listaCalculada = new ArrayList<>();
 
-            // 8. Loop de Negócio: Transforma clientes genéricos em instâncias reais de Tiers via polimorfismo
+            // 8.Transforma clientes genéricos em instâncias reais de Tiers via polimorfismo
             for (Cliente cOriginal : clientesConsolidados) {
                 Cliente clienteTipado = fabrica.fabricarCliente(cOriginal);
                 clienteTipado.setCashBackAcumulado(calculadora.calcularCashbackFinal(clienteTipado));
@@ -84,7 +84,7 @@ public class CashbackServlet extends HttpServlet {
             HttpSession session = request.getSession();
             session.setAttribute("listaCompleta", listaCalculada);
 
-            // Padrão Post-Redirect-Get: Redireciona com segurança limpando a requisição POST
+            // Redireciona com segurança limpando a requisição POST
             response.sendRedirect("processa");
 
         } catch (Exception e) {
@@ -120,7 +120,7 @@ public class CashbackServlet extends HttpServlet {
 
         
 
-        // RF05 - Fluxo de exportação do arquivo final CSV para o usuário sem caminhos fixos
+        // RF05 - Fluxo de exportação do arquivo final CSV para o usuário.
         if ("exportar".equals(acao)) {
             java.nio.file.Path pathRelatorio = null;
             try {
