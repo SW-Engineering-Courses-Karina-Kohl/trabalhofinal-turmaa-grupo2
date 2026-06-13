@@ -1,71 +1,91 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/RBBavBFg)
-# projeto-base
-#Projeto CashBack Grupo 2 (Desenvolvimento de Software)
+# Sistema de Cashback — Fidelidade Dinâmica
 
+**Projeto Final — INF01120 (Desenvolvimento de Software) — Grupo 2, Turma A**
 
-DIAGRAMA DE CLASSES: https://lucid.app/lucidchart/344f43a3-3f02-47ad-bc46-69014c10779a/edit?view_items=.qRPg_8k92-u&page=0_0&invitationId=inv_c8a31e5d-f9b5-4112-b028-798c4b6e3f93
----
+## Descrição
 
-# 💰 Sistema de Cashback - Fidelidade Dinâmica
+Este projeto é uma aplicação web em Java desenvolvida para automatizar o processamento de vendas mensais e o cálculo de fidelidade (**Cashback**). O diferencial está na lógica de **Bonificação Dinâmica**: o retorno financeiro é calculado com base na categoria do produto e escalonado conforme o gasto total do cliente, através de níveis de fidelidade (Tiers).
 
-## 📝 Descrição
-Este projeto é uma aplicação Java desenvolvida para automatizar o processamento de vendas mensais e cálculo de fidelidade (**Cashback**). O diferencial da engine está na lógica de **Bonificação Dinâmica**, onde o retorno financeiro é calculado com base na categoria do produto e escalonado conforme o gasto total do cliente através de níveis de fidelidade (Tiers).
+## Funcionalidades
 
----
+- **Importação de Dados:** processamento de arquivos `.csv` com suporte a múltiplas transações por cliente.
+- **Consolidação Automática:** agrupamento do histórico de compras por `cliente_id` antes da aplicação das regras.
+- **Motor de Cálculo:**
+  - Cashback por categoria: Eletrônicos (5%), Vestuário (3%) e Outros (1%).
+  - Bônus progressivo por Tier, conforme o gasto total.
+- **Interface Web:** tela para upload do arquivo, visualização do extrato e busca por ID de cliente.
+- **Exportação:** geração de um relatório consolidado em formato CSV para download.
 
-## 🚀 Funcionalidades
-*   **Importação de Dados:** Processamento de arquivos `.csv` com suporte a múltiplas transações por cliente.
-*   **Consolidação Automática:** Agrupamento inteligente de histórico de compras por `cliente_id` antes da aplicação das regras de bonificação.
-*   **Motor de Cálculo:** 
-    *   Cashback fixo por categoria: Eletrônicos (5%), Vestuário (3%) e Outros (1%).
-    *   Bônus progressivo por Tier (acumulativo para gastos acima de R$ 1.000,00 e R$ 5.000,00).
-*   **Relatórios:** Geração de extratos individuais e exportação de resultados consolidados em formato CSV.
+## Arquitetura
 
----
+O projeto segue os princípios de **Clean Code** e **Separação de Preocupações (SoC)**, organizado nos seguintes pacotes:
 
-## 🛠️ Arquitetura e Tech Stack
-O projeto foi estruturado seguindo princípios de **Clean Code** e **Separação de Preocupações (SoC)**, organizado nos seguintes pacotes lógicos:
+- **`model`**: classes de domínio — `Cliente` (e as subclasses `ClienteNormal`, `ClienteGold`, `ClientePlatinum`), `Venda` e `CategoriaProduto`.
+- **`service`**: lógica de negócio — `CalculadoraCashback`, `ConsolidadorClientes` e `FabricaCliente`.
+- **`persistence`**: camada de entrada e saída — `LeitorCSV`, `GerenciadorDeArquivos` e `ExportadorDadosCSV`.
+- **`controller`**: camada web — `CashbackServlet`.
+- **`webapp`**: interface do usuário (`index.jsp`).
 
-*   **`model`**: Classes de domínio (`Cliente`, `Venda`, `Tier`).
-*   **`service`**: Engine de cálculo e implementação da lógica de negócio.
-*   **`persistence`**: Camada de I/O responsável pelo *parsing* e geração dos arquivos CSV.
-*   **`view`**: Interface para interação e visualização do extrato.
+### Conceitos de OO aplicados
+Herança e polimorfismo (níveis de cliente), padrão Factory (`FabricaCliente`), padrão Fachada (`GerenciadorDeArquivos`) e separação em camadas.
 
-### Tecnologias:
-- Java 17+
-- JUnit (para validação do motor de cashback)
-- Maven/Gradle (opcional)
+### Tecnologias
+- Java 17
+- Apache Tomcat
+- Docker / docker-compose
+- Maven
+- JUnit e Jacoco (testes e cobertura)
 
----
+## Regras de Negócio
 
-## 📊 Regras de Negócio (Engine)
-O cálculo do benefício segue a lógica matemática abaixo:
+O cashback total de cada cliente é a soma do cashback de cada venda (por categoria) com o bônus do seu Tier.
 
-$$Cashback_{Total} = \sum (Valor_{Item} \times \%_{Categoria}) + Bônus_{Tier}$$
+### Tabela de Tiers
 
-### Tabela de Tiers e Bonificação
-
-| Tier | Critério | Bônus Adicional |
+| Tier | Critério (gasto total) | Bônus adicional |
 | :--- | :--- | :--- |
-| **Normal** | < R$ 1.000,00 | Apenas % da Categoria |
-| **Gold** | > R$ 1.000,00 | R$ 50,00 Fixo |
-| **Platinum** | > R$ 5.000,00 | R$ 50,00 Fixo + 2% sobre o valor total |
+| **Normal** | até R$ 1.000,00 | nenhum |
+| **Gold** | acima de R$ 1.000,00 | R$ 50,00 fixo |
+| **Platinum** | acima de R$ 5.000,00 | R$ 50,00 fixo + 2% do total |
 
----
+> A comparação usa "maior que" (`>`): um gasto de exatamente R$ 1.000 permanece Normal, e exatamente R$ 5.000 permanece Gold.
 
-## 📥 Como Rodar
+## Como Rodar
 
-1. **Pré-requisitos:** Certifique-se de ter o **JDK 17** ou superior instalado e configurado no seu PATH.
-2. **Clone o repositório:**
+A aplicação é executada via **Docker**, então não é necessário instalar Java ou Tomcat localmente.
+
+**Pré-requisitos:** ter o [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado e em execução.
+
+1. Clone o repositório:
    ```bash
-   git clone https://github.com/seu-usuario/seu-repositorio.git
+   git clone https://github.com/SW-Engineering-Courses-Karina-Kohl/trabalhofinal-turmaa-grupo2.git
    ```
-3. **Preparação:** Coloque o arquivo `vendas_mensais.csv` na pasta raiz do projeto.
-4. **Execução:**
-   Compile e rode a classe principal através do terminal:
+2. Entre na pasta do projeto e suba o container:
    ```bash
-   javac Main.java && java Main
+   docker-compose up --build -d
    ```
+3. Acesse no navegador:
+   ```
+   http://localhost:8080
+   ```
+4. Faça o upload de um arquivo CSV de vendas (ex.: `cliente.csv`), visualize o extrato e exporte o resultado.
 
----
+Para parar a aplicação:
+```bash
+docker-compose down
+```
+
+### Formato do CSV de entrada
+```
+id_venda,cliente_id,nome_cliente,valor,categoria
+```
+
+## Testes
+
+O projeto possui testes unitários (JUnit) cobrindo a lógica de negócio, com cobertura medida pelo Jacoco. Para rodar os testes:
+
+```bash
+docker run --rm -v "${PWD}:/app" -w /app maven:3.9-eclipse-temurin-17 mvn test
+```
+
 
